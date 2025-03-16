@@ -1,9 +1,11 @@
-import mongoose from "mongoose";
+import mongoose ,{ model, Schema } from "mongoose";
 import * as dotenv from "dotenv";
 
-const Schema = mongoose.Schema,
-  ObjectId = Schema.ObjectId;
+mongoose.connect(``);
 
-const userSchema = new Schema({});
+const UserSchema = new Schema({
+      username : {type: String , unique : true},
+      password : String
+});
 
-export const userModel = mongoose.model("user", userSchema);
+export const UserModel = model("User");
