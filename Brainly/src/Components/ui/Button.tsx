@@ -11,19 +11,23 @@ interface ButtonProps{
 
 const variantStyle = {
     "primary": "bg-purple-600 text-white",
-    "secondary": "bg-purple-400 text-purple-600"
+    "secondary": "bg-[#e0e7fe] text-purple-600"
 }
 
 const sizeStyle = {
-    "sm " : "p-6",
-    "md" : "p-4",
-    "lg" : "p-6"
+    "sm " : "py-1 px-2",
+    "md" : "py-2 px-4",
+    "lg" : "py-4 px-6"
 }
 const defaultStyle = "rounded-md"
 
 export const Button = (props: ButtonProps) =>{
-    return <button className={`${variantStyle[props.variant]} ${defaultStyle} ${sizeStyle[props.size]} `}>{props.text} </button>
+    return <button className={`${variantStyle[props.variant]} ${defaultStyle} ${sizeStyle[props.size]} `}>{props.startIcon} {props.text}  {props.endIcon} </button>
 }
+
+
+
+
 {/* <Button variant="primary" size="md" text={"asd"} onClick={()=> {}}></Button> */}
 
 
