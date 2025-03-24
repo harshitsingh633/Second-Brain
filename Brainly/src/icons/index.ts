@@ -7,3 +7,7 @@ export const iconSizeVariants = {
     "md" : "size-4",
     "lg" : "size-6"
 }
+
+export interface ShareIconProps {
+    
+}
