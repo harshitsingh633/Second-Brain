@@ -120,12 +120,25 @@ app.get("/api/v1/brain/:shareLink",async (req, res) => {
     res.status(411).json({
       message : "Sorry incorrect input"
     })
+    return ;
   }
 
   const content = await ContentModel.find({
-    userId : link?.userId
+    userId : link.userId
+  })
+  const user = await UserModel.findOne({
+    _id : link.userId
   })
 
+  if(!user){
+    res.status(411).json({
+      message : "user not found, error should ideally not happen"
+    })
+  }
+  res.json({
+    username : user?.username,
+    content : content
+  })
 
 });
 
