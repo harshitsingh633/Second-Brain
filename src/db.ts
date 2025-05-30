@@ -1,16 +1,25 @@
-import * as dotenv from "dotenv";
-dotenv.config();
-import mongoose ,{ model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 
-if(!process.env.MONGO_URL){
-      throw new Error ("MONGO_URL is not present in the Environment Variable file");
-}
+mongoose.connect("")
+const userSchema = new mongoose.Schema({
+    username : {type : String , required : true , unique : true},
+    password : {type : String , required : true,}
+})
 
-mongoose.connect(`${process.env.MONGO_URL}`);
+export const UserModel = model("User",userSchema)
 
-const UserSchema = new Schema({
-      username : {type: String , unique : true},
-      password : String
-});
+const contentSchema = new mongoose.Schema({
+    title: String,
+    link : String,
+    tags : [{type: mongoose.Types.ObjectId, ref:"Tag"}],
+    userId : {type: mongoose.Types.ObjectId, ref:"User", required:true}
+})
 
-export const UserModel = model("User");
+export const ContentModel = model("Content" , contentSchema);
+
+const linkSchema = new mongoose.Schema({
+    hash : String,
+    userId : {type: mongoose.Types.ObjectId, ref : "User", require: true , unique: true},
+})
+
+export const LinkModel = model("Links" , linkSchema);

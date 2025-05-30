@@ -1,62 +1,43 @@
-import * as dotenv from "dotenv";
-dotenv.config();
 import express from "express";
+import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
-import { UserModel } from "./db";
-import bcrypt from "bcrypt";
-import { z } from "zod";
+import { ContentModel, LinkModel, UserModel } from "./db";
+import { JWT_Password } from "./config";
+import { userMiddleware } from "./middleware";
+import { random } from "./utilis";
 const app = express();
-
-
-if(!process.env.Jwt_Password){
-  throw new Error("JWT_SECRET is not set in the environment variables");
-}
-
-const Jwt_password = process.env.Jwt_Password;
-
 app.use(express.json());
 
-const UserSchema = z.object({
-    username : z.string().min(3).max(20),
-    password : z.string().min(6).max(50),
-})
-
 app.post("/api/v1/signup", async (req, res) => {
-  // TODO: zod validation , hash the password
-  const { username, password } = UserSchema.parse(req.body);
-
-  const hashPassword = await bcrypt.hash(password,10);
-
+  const { username, password } = req.body;
   try {
     await UserModel.create({
       username: username,
-      password: hashPassword,
+      password: password,
     });
-    res.json({
+
+    res.status(200).json({
       message: "User signed up",
     });
   } catch (e) {
     res.status(411).json({
-      message: "User already exsists",
+      message: "User already exists",
     });
   }
 });
 
-
-
 app.post("/api/v1/signin", async (req, res) => {
-  const { username, password } = UserSchema.parse(req.body);
-
-
+  const { username, password } = req.body;
   const existingUser = await UserModel.findOne({
-    username
+    username,
+    password,
   });
   if (existingUser) {
     const token = jwt.sign(
       {
         id: existingUser._id,
       },
-      Jwt_password
+      JWT_Password
     );
 
     res.json({
@@ -64,20 +45,88 @@ app.post("/api/v1/signin", async (req, res) => {
     });
   } else {
     res.status(403).json({
-      message: "Incorrect credentials",
+      message: "Incorrect Credientials",
     });
   }
 });
 
-app.post("/api/v1/content", (req, res) => {
-  const {username , password } = UserSchema.
+app.post("/api/v1/content", userMiddleware, async (req, res) => {
+  const link = req.body.link;
+  const type = req.body.type;
+
+  await ContentModel.create({
+    link,
+    type,
+
+    //@ts-ignore
+    userId: req.userId,
+    tags: [],
+  });
+
+  res.json({
+    message: "Content added",
+  });
+});
+
+app.get("/api/v1/content", async (req, res) => {
+  //@ts-ignore
+  const userId = req.body.userId;
+  const content = await ContentModel.find({
+    userId: userId,
+  }).populate("userId");
+  res.json({
+    content,
+  });
+});
+
+app.delete("/api/v1/content", userMiddleware, async (req, res) => {
+  const contentId = req.body.contentId;
+  await ContentModel.deleteMany({
+    contentId,
+    //@ts-ignore
+    userId: req.userId,
+  });
+});
+
+app.post("/api/v1/brain/share", userMiddleware,async (req, res) => {
+  const share = req.body.share;
+  if(share){
+   await LinkModel.create({
+      //@ts-ignore
+      userId: req.userId,
+      hash:random(8),
+    })
+  }
+  else{
+   await LinkModel.deleteOne({
+    //@ts-ignore
+        userId: req.userId
+      });
+    }
+  res.json({
+    message :"Update Shareable Link"
+  })
 
 });
 
-app.get("/api/v1/content", (req, res) => {});
+app.get("/api/v1/brain/:shareLink",async (req, res) => {
+  const hash = req.params.shareLink;
+  
+  const link = await LinkModel.findOne({
+    hash,
+  });
 
-app.delete("/api/v1/content", (req, res) => {});
+  if(!link){
+    res.status(411).json({
+      message : "Sorry incorrect input"
+    })
+  }
 
-app.get("/api/v1/brain/:shareLink", (req, res) => {});
+  const content = await ContentModel.find({
+    userId : link?.userId
+  })
 
-app.listen(8000);
+
+});
+
+app.listen(3000);
