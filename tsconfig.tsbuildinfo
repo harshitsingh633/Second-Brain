@@ -1,1 +1,1 @@
-{"root":["./Second-Brain frontend/vite.config.ts","./Second-Brain frontend/src/App.tsx","./Second-Brain frontend/src/main.tsx","./Second-Brain frontend/src/vite-env.d.ts","./src/db.ts","./src/index.ts","./src/middleware.ts"],"errors":true,"version":"5.8.2"}
+{"root":["./src/config.ts","./src/db.ts","./src/index.ts","./src/middleware.ts","./src/utilis.ts"],"version":"5.8.3"}
